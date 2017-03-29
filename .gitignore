@@ -1,0 +1,11 @@
+*.po
+src/lib
+src/include/aconfig.h
+src/include/config.h
+src/include/version.h
+bin
+config.log
+config.status
+Makefile
+Makefile.in
+*.o

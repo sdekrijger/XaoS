@@ -39,7 +39,7 @@
 xlibparam xparams = { 0, 0, 0, 0, NULL, -1 };
 
 static int allocated;
-Cursor normal, xwait, replay;
+Cursor normal, xwait, replay, vjcursor;
 
 struct ui_driver x11_driver;
 static xdisplay *d;
@@ -357,7 +357,10 @@ static void x11_cursor(int mode)
 	XDefineCursor(d->display, d->window, replay);
 	/*defined=1; */
 	break;
-    }
+    case VJMOUSE:
+  XDefineCursor(d->display, d->window, vjcursor);
+  break;
+  }
     XFlush(d->display);
 }
 
@@ -396,10 +399,20 @@ static int x11_init(void)
 	d = xalloc_display("XaoS", XSIZE, YSIZE, &xparams);
     if (d == NULL)
 	return 0;
+
+    /* empty cursor for VJ mode */
+    Pixmap no_pixmap;
+    XColor black;
+    static char nothing[] = {0,0,0,0,0,0,0,0};
+    no_pixmap = XCreateBitmapFromData(d->display, DefaultRootWindow(d->display), nothing, 8, 8);
+  
+  
     /*normal=XCreateFontCursor(d->display,XC_arrow); */
     normal = XCreateFontCursor(d->display, XC_left_ptr);
     xwait = XCreateFontCursor(d->display, XC_watch);
     replay = XCreateFontCursor(d->display, XC_dot);
+    vjcursor = XCreatePixmapCursor(d->display, no_pixmap, no_pixmap, &black, &black, 0,0);
+
     if (d->truecolor || d->privatecolormap)
 	x11_driver.flags &= ~RANDOM_PALETTE_SIZE;
     if (!alloc_image(d)) {
